@@ -1,9 +1,12 @@
 #!usr/bin/env python3
 import json
+import math
 import sys
 import os
+import numpy as np
 
-INPUT_FILE = 'testdata.json' # Constant variables are usually in ALL CAPS
+INPUT_FILE = 'testdata.json'  # Constant variables are usually in ALL CAPS
+
 
 class User:
     def __init__(self, name, gender, preferences, grad_year, responses):
@@ -16,8 +19,24 @@ class User:
 
 # Takes in two user objects and outputs a float denoting compatibility
 def compute_score(user1, user2):
-    # YOUR CODE HERE
-    return 0
+    total_score = 0
+    grade_weight = 3
+    answer_weight = 2
+
+    # homophobic checking of preferences
+    if user1.gender == user2.gender:
+        total_score = 0
+        return 0
+    #print("year: " + str(1.0 / (grade_weight * (1 + abs(user1.grad_year - user2.grad_year)))))
+    total_score += 1.0 / (grade_weight * (1 + abs(user1.grad_year - user2.grad_year)))
+
+    # Add to score depending on how close responses are
+    for i in range(len(user1.responses)):
+        if user1.responses[i] == user2.responses[i]:
+            #print("answers:" + str(1.0 / (answer_weight * (1 + rarity[i][user2.responses[i]]))))
+            total_score += 1.0 / (answer_weight * (1 + rarity[i][user2.responses[i]]))
+
+    return total_score
 
 
 if __name__ == '__main__':
@@ -35,8 +54,27 @@ if __name__ == '__main__':
                             user_obj['responses'])
             users.append(new_user)
 
-    for i in range(len(users)-1):
-        for j in range(i+1, len(users)):
+    rarity = np.zeros((len(users[0].responses), 6))
+
+    # Make table with rarity of the responses
+    for i in range(len(users)):
+        user = users[i]
+        responses = user.responses
+        for j in range(len(responses)):
+            rarity[j][responses[j]] += 1
+
+            # if users[i].responses[i] == users[j].responses[i]:
+            #     percentage += 1
+
+            # print(users[i].responses[i])
+
+        # rarity.append(percentage)
+
+    print(rarity)
+
+
+    for i in range(len(users) - 1):
+        for j in range(i + 1, len(users)):
             user1 = users[i]
             user2 = users[j]
             score = compute_score(user1, user2)
