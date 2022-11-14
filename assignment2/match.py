@@ -1,7 +1,85 @@
 import numpy as np
 from typing import List, Tuple
 
+
+
 def run_matching(scores: List[List], gender_id: List, gender_pref: List) -> List[Tuple]:
+
+    length = len(gender_pref)
+    p_preferences = {}
+    a_preferences = {}
+    matched = {}
+    unmatched = []
+    compatible = False
+
+    proposers = [0, 1, 2, 3, 4]
+    rejecters = [5, 6, 7, 8, 9]
+    rejecters_copy = rejecters.copy()
+
+    for i in range(0, length // 2):
+        p_preferences[i] = scores[i]
+
+    for i in range(length // 2, length):
+        a_preferences[i] = scores[i]
+
+        # for i, person in enumerate(scores):
+        #     for j, person_scores in enumerate(person):
+        #         print(person_scores)
+
+    for p in proposers:
+        for r in rejecters:
+            #if gender_pref[p] == gender_id[r] and gender_pref[r] == gender_id[p]:
+            if r not in matched:   # If rejecter is not matched, match them
+                    matched[r] = p
+                    print("match:" + str(p) + "And" + str(r))
+                    rejecters_copy.remove(r)
+                    break
+
+            else:   # If rejector is already matched, compare the new person and the current match
+                if scores[p][r] > scores[matched[r]][r]:
+                    unmatched.append(matched[r])
+                    matched[r] = p
+                    print("matchagain:" + str(p) + "And" + str(r))
+                    break
+
+    for i in rejecters_copy:
+        unmatched.append(i)
+
+    new_prop = []
+    new_rej = []
+
+    for i in range(0, len(unmatched) // 2):
+        new_prop.append(unmatched[i])
+
+    for i in range(len(unmatched) // 2, len(unmatched)):
+        new_rej.append(unmatched[i])
+
+        for p in new_prop:
+            for r in new_rej:
+
+                #if gender_pref[p] == gender_id[r] and gender_pref[r] == gender_id[p]:
+                if r not in matched:  # If rejecter is not matched, match them
+                    print("match:" + str(p) + "And" + str(r))
+                    matched[r] = p
+                    break
+                else:  # If rejector is already matched, compare the new person and the current match
+                    if scores[p][r] > scores[matched[r]][r]:
+                        unmatched.append(matched[r])
+                        matched[r] = p
+                        print("matchagain:" + str(p) + "And" + str(r))
+                        break
+
+    print("matched:" + str(matched))
+    print("unmatched:" + str(unmatched))
+
+    matches = [(k, v) for k, v in matched.items()]
+    print(matches)
+
+    return matches
+
+
+
+
     """
     TODO: Implement Gale-Shapley stable matching!
     :param scores: raw N x N matrix of compatibility scores. Use this to derive a preference rankings.
@@ -21,8 +99,11 @@ def run_matching(scores: List[List], gender_id: List, gender_pref: List) -> List
             - What data structure can you use to take advantage of this fact when forming your matches?
         - This is by no means an exhaustive list, feel free to reach out to us for more help!
     """
-    matches = [()]
-    return matches
+
+    
+
+
+
 
 if __name__ == "__main__":
     raw_scores = np.loadtxt('raw_scores.txt').tolist()
